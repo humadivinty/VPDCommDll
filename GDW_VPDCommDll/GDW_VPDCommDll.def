@@ -1,0 +1,9 @@
+LIBRARY
+EXPORTS
+
+GDW_Connect
+GDW_Disconnect
+GDW_Capture
+GDW_GetVehicleInfo
+GDW_GetVehicleInfo2AD
+GDW_AdjustTime
