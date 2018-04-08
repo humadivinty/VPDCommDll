@@ -29,8 +29,9 @@
 #define DIS_CONNECT_MSG 0x403
 
 #define BIN_IMG_SIZE 5*1024
-#define PLATE_IMG_SIZE 5*1024
-#define BIG_IMG_SIZE 100*1024
+#define COMPRESS_PLATE_IMG_SIZE 5*1024
+#define COMPRESS_BIG_IMG_SIZE 100*1024
+#define  MAX_IMG_SIZE 10*1024*1024
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
@@ -137,22 +138,22 @@ BOOL CTest_GDW_VPDCommDllDlg::OnInitDialog()
     DWORD dwMS = dwNowTick % 1000;
 
     char chTimeInfo[128] = { 0 };
-    sprintf_s(chTimeInfo, "%4d%02d%02d%02d%02d%02d", pTM.tm_year + 1900, pTM.tm_mon + 1, pTM.tm_mday, pTM.tm_hour, pTM.tm_min, pTM.tm_sec);
+    sprintf_s(chTimeInfo,sizeof(chTimeInfo), "%4d%02d%02d%02d%02d%02d", pTM.tm_year + 1900, pTM.tm_mon + 1, pTM.tm_mday, pTM.tm_hour, pTM.tm_min, pTM.tm_sec);
     GetDlgItem(IDC_EDIT1)->SetWindowText(chTimeInfo);
 
     CButton* radio = (CButton*)GetDlgItem(IDC_RADIO2);
     radio->SetCheck(1);
     m_bMsgEnable = true;
 
-    m_uchBin = new unsigned char[BIN_IMG_SIZE];
-    m_uchPlateImg = new unsigned char[PLATE_IMG_SIZE];
-    m_uchCarImg = new unsigned char[BIG_IMG_SIZE];
-    m_uchFarImg = new unsigned char[BIG_IMG_SIZE];
+    m_uchBin = new unsigned char[MAX_IMG_SIZE];
+    m_uchPlateImg = new unsigned char[MAX_IMG_SIZE];
+    m_uchCarImg = new unsigned char[MAX_IMG_SIZE];
+    m_uchFarImg = new unsigned char[MAX_IMG_SIZE];
 
-    memset(m_uchBin, 0, BIN_IMG_SIZE);
-    memset(m_uchPlateImg, 0, PLATE_IMG_SIZE);
-    memset(m_uchCarImg, 0, BIG_IMG_SIZE);
-    memset(m_uchFarImg, 0, BIG_IMG_SIZE);
+    memset(m_uchBin, 0, MAX_IMG_SIZE);
+    memset(m_uchPlateImg, 0, MAX_IMG_SIZE);
+    memset(m_uchCarImg, 0, MAX_IMG_SIZE);
+    memset(m_uchFarImg, 0, MAX_IMG_SIZE);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -214,7 +215,7 @@ void CTest_GDW_VPDCommDllDlg::OnBnClickedButtonConnet()
     int iRet = GDW_Connect(this->m_hWnd, DATA_MESSAGE_NO, RE_CONNECT_MSG, DIS_CONNECT_MSG);
     //int iRet = GDW_Connect(this->GetSafeHwnd(), DATA_MESSAGE_NO, RE_CONNECT_MSG, DIS_CONNECT_MSG);
     char chLog[260] = { 0 };
-    sprintf_s(chLog, "GDW_Connet 返回指为 %d", iRet);
+    sprintf_s(chLog, sizeof(chLog),"GDW_Connet 返回指为 %d", iRet);
     MessageBox(chLog);
 }
 
@@ -237,7 +238,7 @@ void CTest_GDW_VPDCommDllDlg::OnBnClickedButtonSetip()
     GetDlgItem(IDC_IPADDRESS1)->GetWindowText(cstrIP);
 
     char chTemp[256] = { 0 };
-    sprintf_s(chTemp, "%s", cstrIP.GetBuffer());
+    sprintf_s(chTemp, sizeof(chTemp),"%s", cstrIP.GetBuffer());
     cstrIP.ReleaseBuffer();
 
     WritePrivateProfileStringA("Device", "IP", chTemp, iniFileName);
@@ -254,7 +255,7 @@ void CTest_GDW_VPDCommDllDlg::OnBnClickedButtonSettime()
     cstrTimeInfo.ReleaseBuffer();
 
     char chLog[260] = { 0 };
-    sprintf_s(chLog, "GDW_AdjustTime: %s  返回指为 %d", cstrTimeInfo.GetBuffer(), iRet);
+    sprintf_s(chLog, sizeof(chLog),"GDW_AdjustTime: %s  返回指为 %d", cstrTimeInfo.GetBuffer(), iRet);
     cstrTimeInfo.ReleaseBuffer();
     MessageBox(chLog);
 }
@@ -265,7 +266,7 @@ void CTest_GDW_VPDCommDllDlg::OnBnClickedButtonCapture()
     // TODO:  在此添加控件通知处理程序代码
     int iRet = GDW_Capture();
     char chLog[260] = { 0 };
-    sprintf_s(chLog, "GDW_Capture 返回指为 %d", iRet);
+    sprintf_s(chLog,sizeof(chLog), "GDW_Capture 返回指为 %d", iRet);
     MessageBox(chLog);
 }
 
@@ -277,15 +278,15 @@ void CTest_GDW_VPDCommDllDlg::OnBnClickedButtonGetinfo()
     char chPlateTime[128] = { 0 };
     UINT dwPlateSize = 0, dwCarImgSize = 0, dwFarImgSize = 0;
     Dlg_WriteLog("call OnBnClickedButtonGetinfo");
-    unsigned char* uchBin = new unsigned char[BIN_IMG_SIZE];
-    unsigned char* uchPlateImg = new unsigned char[PLATE_IMG_SIZE];
-    unsigned char* uchCarImg = new unsigned char[BIG_IMG_SIZE];
-    unsigned char* uchFarImg = new unsigned char[BIG_IMG_SIZE];
+    unsigned char* uchBin = new unsigned char[MAX_IMG_SIZE];
+    unsigned char* uchPlateImg = new unsigned char[MAX_IMG_SIZE];
+    unsigned char* uchCarImg = new unsigned char[MAX_IMG_SIZE];
+    unsigned char* uchFarImg = new unsigned char[MAX_IMG_SIZE];
 
-    memset(uchBin, 0, BIN_IMG_SIZE);
-    memset(uchPlateImg, 0, PLATE_IMG_SIZE);
-    memset(uchCarImg, 0, BIG_IMG_SIZE);
-    memset(uchFarImg, 0, BIG_IMG_SIZE);
+    memset(uchBin, 0, MAX_IMG_SIZE);
+    memset(uchPlateImg, 0, MAX_IMG_SIZE);
+    memset(uchCarImg, 0, MAX_IMG_SIZE);
+    memset(uchFarImg, 0, MAX_IMG_SIZE);
     Dlg_WriteLog("call OnBnClickedButtonGetinfo ask for memery.");
 
     int iRet = GDW_GetVehicleInfo(chPlateNO, chPlateTime, uchBin,
@@ -298,7 +299,7 @@ void CTest_GDW_VPDCommDllDlg::OnBnClickedButtonGetinfo()
         GetDlgItem(IDC_STATIC_PTIME)->SetWindowText(chPlateTime);
         char chFileName[MAX_PATH] = { 0 };
         //sprintf_s(chFileName, ".\\Result\\%ld-%s-%s", GetTickCount(), chPlateNO, chPlateTime);
-        sprintf_s(chFileName, ".\\Result\\%ld-%s", GetTickCount(), chPlateTime);
+        sprintf_s(chFileName, sizeof(chFileName),".\\Result\\%ld-%s", GetTickCount(), chPlateTime);
         if (!strstr(chPlateNO, "无") && !strstr(chPlateNO, "*"))
         {
             std::string strPath = std::string(chFileName).append("-bin.bin");
@@ -353,7 +354,7 @@ void CTest_GDW_VPDCommDllDlg::OnBnClickedButtonGetinfo()
 
 
     char chLog[260] = { 0 };
-    sprintf_s(chLog, "GDW_GetVehicleInfo 返回值为 %d", iRet);
+    sprintf_s(chLog,sizeof(chLog), "GDW_GetVehicleInfo 返回值为 %d", iRet);
     Dlg_WriteLog(chLog);
     MessageBox(chLog);
 }
@@ -366,14 +367,14 @@ void CTest_GDW_VPDCommDllDlg::OnBnClickedButtongetinfo2ad()
     char chPlateTime[128] = { 0 };
     UINT dwPlateSize = 0, dwCarImgSize = 0, dwFarImgSize = 0;
     Dlg_WriteLog("Call OnBnClickedButtongetinfo2ad .");
-    unsigned char* uchBin = new unsigned char[BIN_IMG_SIZE];
-    unsigned char* uchPlateImg = new unsigned char[PLATE_IMG_SIZE];
-    unsigned char* uchCarImg = new unsigned char[BIG_IMG_SIZE];
+    unsigned char* uchBin = new unsigned char[MAX_IMG_SIZE];
+    unsigned char* uchPlateImg = new unsigned char[MAX_IMG_SIZE];
+    unsigned char* uchCarImg = new unsigned char[MAX_IMG_SIZE];
 
 
-    memset(uchBin, 0, BIN_IMG_SIZE);
-    memset(uchPlateImg, 0, PLATE_IMG_SIZE);
-    memset(uchCarImg, 0, BIG_IMG_SIZE);
+    memset(uchBin, 0, MAX_IMG_SIZE);
+    memset(uchPlateImg, 0, MAX_IMG_SIZE);
+    memset(uchCarImg, 0, MAX_IMG_SIZE);
     Dlg_WriteLog("ask for memery.");
 
     int iRet = GDW_GetVehicleInfo2AD(chPlateNO, chPlateTime, uchBin,
@@ -385,7 +386,7 @@ void CTest_GDW_VPDCommDllDlg::OnBnClickedButtongetinfo2ad()
         GetDlgItem(IDC_STATIC_PLATENO)->SetWindowText(chPlateNO);
         GetDlgItem(IDC_STATIC_PTIME)->SetWindowText(chPlateTime);
         char chFileName[MAX_PATH] = { 0 };
-        sprintf_s(chFileName, ".\\Result\\%ld-%s-%s", GetTickCount(), chPlateNO, chPlateTime);
+        sprintf_s(chFileName, sizeof(chFileName),".\\Result\\%ld-%s-%s", GetTickCount(), chPlateNO, chPlateTime);
         if (!strstr(chPlateNO, "无"))
         {
             std::string strPath = std::string(chFileName).append("-bin.bin");
@@ -427,7 +428,7 @@ void CTest_GDW_VPDCommDllDlg::OnBnClickedButtongetinfo2ad()
         uchCarImg = NULL;
     }
     char chLog[260] = { 0 };
-    sprintf_s(chLog, "GDW_GetVehicleInfo2AD 返回值为 %d", iRet);
+    sprintf_s(chLog,sizeof(chLog), "GDW_GetVehicleInfo2AD 返回值为 %d", iRet);
     Dlg_WriteLog(chLog);
     MessageBox(chLog);
 }
@@ -438,7 +439,7 @@ void CTest_GDW_VPDCommDllDlg::OnBnClickedButtonDiscon()
     // TODO:  在此添加控件通知处理程序代码
     int iRet = GDW_Disconnect();
     char chLog[260] = { 0 };
-    sprintf_s(chLog, "GDW_Disconnect 返回指为 %d", iRet);
+    sprintf_s(chLog,sizeof(chLog), "GDW_Disconnect 返回指为 %d", iRet);
     MessageBox(chLog);
 }
 
@@ -460,11 +461,11 @@ void CTest_GDW_VPDCommDllDlg::Dlg_WriteLog(const char* chLog)
     PathRemoveFileSpec(szFileName);				//去掉程序名
 
     char chLogPath[MAXPATH] = { 0 };
-    sprintf_s(chLogPath, "%s\\XLWLog\\%d-%02d-%02d\\", szFileName, pTM.tm_year + 1900, pTM.tm_mon + 1, pTM.tm_mday);
+    sprintf_s(chLogPath, sizeof(chLogPath),"%s\\XLWLog\\%d-%02d-%02d\\", szFileName, pTM.tm_year + 1900, pTM.tm_mon + 1, pTM.tm_mday);
     MakeSureDirectoryPathExists(chLogPath);
 
     char chLogFileName[MAXPATH] = { 0 };
-    sprintf_s(chLogFileName, "%s\\Dlg.log", chLogPath);
+    sprintf_s(chLogFileName, sizeof(chLogFileName), "%s\\Dlg.log", chLogPath);
 
     FILE *file = NULL;
     //file = fopen(chLogFileName, "a+");
@@ -507,7 +508,7 @@ bool CTest_GDW_VPDCommDllDlg::SaveImgToDisk(const char* chImgPath, BYTE* pImgDat
         if (iWritedSpecialSize == dwImgSize)
         {
             char chLogBuff[MAX_PATH] = { 0 };
-            sprintf_s(chLogBuff, "%s save success\n", chImgPath);
+            sprintf_s(chLogBuff,sizeof(chLogBuff), "%s save success\n", chImgPath);
             //WriteLog(chLogBuff);
             OutputDebugStringA(chLogBuff);
         }
@@ -515,7 +516,7 @@ bool CTest_GDW_VPDCommDllDlg::SaveImgToDisk(const char* chImgPath, BYTE* pImgDat
     else
     {
         char chLogBuff[MAX_PATH] = { 0 };
-        sprintf_s(chLogBuff, "%s save failed\n", chImgPath);
+        sprintf_s(chLogBuff, sizeof(chLogBuff),"%s save failed\n", chImgPath);
         //WriteLog(chLogBuff);
         OutputDebugStringA(chLogBuff);
         bRet = false;
@@ -558,10 +559,10 @@ LRESULT CTest_GDW_VPDCommDllDlg::DefWindowProc(UINT message, WPARAM wParam, LPAR
             char chPlateTime[128] = { 0 };
             UINT dwPlateSize = 0, dwCarImgSize = 0, dwFarImgSize = 0;
 
-            memset(m_uchBin, 0, BIN_IMG_SIZE);
-            memset(m_uchPlateImg, 0, PLATE_IMG_SIZE);
-            memset(m_uchCarImg, 0, BIG_IMG_SIZE);
-            memset(m_uchFarImg, 0, BIG_IMG_SIZE);
+            memset(m_uchBin, 0, MAX_IMG_SIZE);
+            memset(m_uchPlateImg, 0, MAX_IMG_SIZE);
+            memset(m_uchCarImg, 0, MAX_IMG_SIZE);
+            memset(m_uchFarImg, 0, MAX_IMG_SIZE);
 
             Dlg_WriteLog("Call GDW_GetVehicleInfo function.");
 
@@ -577,7 +578,7 @@ LRESULT CTest_GDW_VPDCommDllDlg::DefWindowProc(UINT message, WPARAM wParam, LPAR
                 GetDlgItem(IDC_STATIC_PTIME)->SetWindowText(chPlateTime);
                 char chFileName[MAX_PATH] = { 0 };
                 //sprintf_s(chFileName, ".\\Result\\%ld-%s-%s", GetTickCount(), chPlateNO, chPlateTime);
-                sprintf_s(chFileName, ".\\Result\\%ld-%s", GetTickCount(), chPlateTime);
+                sprintf_s(chFileName,sizeof(chFileName), ".\\Result\\%ld-%s", GetTickCount(), chPlateTime);
                 if (!strstr(chPlateNO, "无") && !strstr(chPlateNO, "*"))
                 {
                     std::string strPath = std::string(chFileName).append("-bin.bin");
@@ -609,7 +610,7 @@ LRESULT CTest_GDW_VPDCommDllDlg::DefWindowProc(UINT message, WPARAM wParam, LPAR
                 }
             }
             char chLog[260] = { 0 };
-            sprintf_s(chLog, "message 调用 GDW_GetVehicleInfo 返回值为 %d\n", iRet);
+            sprintf_s(chLog,sizeof(chLog), "message 调用 GDW_GetVehicleInfo 返回值为 %d\n", iRet);
             OutputDebugStringA(chLog);
             Dlg_WriteLog(chLog);
         }

@@ -23,7 +23,7 @@
 #include<ctime>
 #include<atltime.h>
 
-#define DLL_VERSION "2018040103"
+#define DLL_VERSION "2018040104"
 #define INI_FILE_NAME "\\XLW_VPDCommDll.ini"
 #define DLL_LOG_NAME "GDW_VPDCommDllEvent.txt"
 
@@ -36,5 +36,5 @@
 #define  CAM_COUNT 10
 
 #define BIN_IMG_SIZE 280
-#define PLATE_IMG_SIZE 5*1024
-#define BIG_IMG_SIZE 100*1024
+#define COMPRESS_PLATE_IMG_SIZE 5*1024
+#define COMPRESS_BIG_IMG_SIZE 100*1024

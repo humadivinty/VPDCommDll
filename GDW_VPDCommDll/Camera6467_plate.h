@@ -28,6 +28,8 @@ private:
 private:
 
     int m_iTimeInvl;
+    int m_iCompressBigImgSize;
+    int m_iCompressSamllImgSize;
 
     DWORD m_dwLastCarID;
 
@@ -35,6 +37,8 @@ private:
     bool m_bJpegComplete;
     bool m_bSaveToBuffer;
     bool m_bOverlay;
+    bool m_bCompress;
+
 
     PBYTE m_pTempBin;
     PBYTE m_pTempBig1;

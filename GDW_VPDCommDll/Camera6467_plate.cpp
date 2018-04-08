@@ -21,6 +21,8 @@
 Camera6467_plate::Camera6467_plate() :
 BaseCamera(),
 m_iTimeInvl(3),
+m_iCompressBigImgSize(COMPRESS_BIG_IMG_SIZE),
+m_iCompressSamllImgSize(COMPRESS_PLATE_IMG_SIZE),
 m_pTempBin(NULL),
 m_pTempBig1(NULL),
 g_pUser(NULL),
@@ -32,7 +34,8 @@ m_BufferResult(NULL),
 m_bResultComplete(false),
 m_bJpegComplete(false),
 m_bSaveToBuffer(false),
-m_bOverlay(false)
+m_bOverlay(false),
+m_bCompress(false)
 {
     ReadConfig();
     InitializeCriticalSection(&m_csResult);
@@ -42,6 +45,8 @@ m_bOverlay(false)
 Camera6467_plate::Camera6467_plate(const char* chIP, HWND hWnd, int Msg) : 
 BaseCamera( chIP,   hWnd,  Msg),
 m_iTimeInvl(3),
+m_iCompressBigImgSize(COMPRESS_BIG_IMG_SIZE),
+m_iCompressSamllImgSize(COMPRESS_PLATE_IMG_SIZE),
 m_pTempBin(NULL),
 m_pTempBig1(NULL),
 g_pUser(NULL),
@@ -53,7 +58,8 @@ m_BufferResult(NULL),
 m_bResultComplete(false),
 m_bJpegComplete(false),
 m_bSaveToBuffer(false),
-m_bOverlay(false)
+m_bOverlay(false),
+m_bCompress(false)
 {
     //SetConnectStatus_Callback(NULL, NULL, 10);
     ReadConfig();
@@ -531,20 +537,45 @@ void Camera6467_plate::ReadConfig()
 #endif
 
     //读取可靠性配置文件
-    int iEnable = GetPrivateProfileIntA("SaveToBufferPath", "Enable", 0, iniFileName);
-    m_bSaveToBuffer = (iEnable == 1) ? true : false;
+    int iValue = GetPrivateProfileIntA("SaveToBufferPath", "Enable", 0, iniFileName);
+    m_bSaveToBuffer = (iValue == 1) ? true : false;
 
     char chTemp[256] = { 0 };
     //sprintf_s(chTemp, "%d", iLog);
-    sprintf_s(chTemp, "%d", iEnable);
+    sprintf_s(chTemp, "%d", iValue);
     WritePrivateProfileStringA("SaveToBufferPath", "Enable", chTemp, iniFileName);
 
-    iEnable = GetPrivateProfileIntA("Overlay", "Enable", 0, iniFileName);
-    m_bOverlay = (iEnable == 1) ? true : false;
+    //------------------------------Overlay setting  enable--------------
+    iValue = GetPrivateProfileIntA("Overlay", "Enable", 0, iniFileName);
+    m_bOverlay = (iValue == 1) ? true : false;
 
     memset(chTemp, 0, sizeof(chTemp));
-    sprintf_s(chTemp, "%d", iEnable);
+    sprintf_s(chTemp, "%d", iValue);
     WritePrivateProfileStringA("Overlay", "Enable", chTemp, iniFileName);
+
+    //------------------------------Compress setting  enable--------------
+    iValue = GetPrivateProfileIntA("Compress", "Enable", 0, iniFileName);
+    m_bCompress = (iValue == 1) ? true : false;
+
+    memset(chTemp, 0, sizeof(chTemp));
+    sprintf_s(chTemp, "%d", iValue);
+    WritePrivateProfileStringA("Compress", "Enable", chTemp, iniFileName);
+
+    //-----------------------Compress setting : Big image size--------------
+    iValue = GetPrivateProfileIntA("Compress", "BigImgSize", COMPRESS_BIG_IMG_SIZE, iniFileName);
+    m_iCompressBigImgSize = (iValue > 0) ? iValue : COMPRESS_BIG_IMG_SIZE;
+
+    memset(chTemp, 0, sizeof(chTemp));
+    sprintf_s(chTemp, "%d", iValue);
+    WritePrivateProfileStringA("Compress", "BigImgSize", chTemp, iniFileName);
+
+    //-----------------------Compress setting : Small image size--------------
+    iValue = GetPrivateProfileIntA("Compress", "SmallImgSize", COMPRESS_BIG_IMG_SIZE, iniFileName);
+    m_iCompressSamllImgSize = (iValue > 0) ? iValue : COMPRESS_BIG_IMG_SIZE;
+
+    memset(chTemp, 0, sizeof(chTemp));
+    sprintf_s(chTemp, "%d", iValue);
+    WritePrivateProfileStringA("Compress", "SmallImgSize", chTemp, iniFileName);
 
     BaseCamera::ReadConfig();
 }
@@ -598,11 +629,7 @@ int Camera6467_plate::RecordInfoEnd(DWORD dwCarID)
     SaveModeInfo TempSaveModeInfo;
     sprintf_s(TempSaveModeInfo.chBeginTime, "%d.%02d.%02d_%02d", tm.GetYear(), tm.GetMonth(), tm.GetDay(), tm.GetHour());
     //WriteHistoryInfo(TempSaveModeInfo);
-
-    if (m_bSaveToBuffer)
-    {
-        SaveResultToBufferPath(m_CameraResult);
-    }
+    
     /**************************************队列模式*****begin*****************************************
 
     if (m_CameraResult->fVehLenth > (float)m_iSuperLenth)
@@ -742,13 +769,21 @@ int Camera6467_plate::RecordInfoEnd(DWORD dwCarID)
         }
     }
 
-    //WriteLog("开始压缩车牌小图.");
-    //CompressImg(m_CameraResult->CIMG_PlateImage, PLATE_IMG_SIZE);
-    //WriteLog("开始压缩最清晰大图.");
-    //CompressImg(m_CameraResult->CIMG_BestSnapshot, BIG_IMG_SIZE);
-    //WriteLog("开始压缩最后大图.");
-    //CompressImg(m_CameraResult->CIMG_LastSnapshot, BIG_IMG_SIZE);
-    //WriteLog("全部压缩结束.");
+    if (m_bSaveToBuffer)
+    {
+        SaveResultToBufferPath(m_CameraResult);
+    }
+
+    if (m_bCompress)
+    {
+        WriteLog("开始压缩车牌小图.");
+        CompressImg(m_CameraResult->CIMG_PlateImage, m_iCompressSamllImgSize);
+        WriteLog("开始压缩最清晰大图.");
+        CompressImg(m_CameraResult->CIMG_BestSnapshot, m_iCompressBigImgSize);
+        WriteLog("开始压缩最后大图.");
+        CompressImg(m_CameraResult->CIMG_LastSnapshot, m_iCompressBigImgSize);
+        WriteLog("全部压缩结束.");
+    }
 
     EnterCriticalSection(&m_csResult);
     if (NULL != m_BufferResult)
@@ -771,7 +806,7 @@ int Camera6467_plate::RecordInfoEnd(DWORD dwCarID)
     }
 
     char chLog2[260] = { 0 };
-    sprintf_s(chLog2, "RecordInfoEnd end, dwCarID = %d", dwCarID);
+    sprintf_s(chLog2, sizeof(chLog2), "RecordInfoEnd end, dwCarID = %d", dwCarID);
     WriteLog(chLog2);
     return 0;
 }

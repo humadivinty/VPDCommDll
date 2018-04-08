@@ -214,7 +214,7 @@ GDW_VPDCOMMDLL_API int WINAPI GDW_GetVehicleInfo(char* pchPlate, char* pchTime, 
             }     
 
             g_WriteLog("get jpeg image  success, begin to compress image.");
-            g_pCamera6467->CompressImg(g_IMG_Temp, BIG_IMG_SIZE);
+            g_pCamera6467->CompressImg(g_IMG_Temp, COMPRESS_BIG_IMG_SIZE);
 
             dwPlateJpegSize = 0;
 
@@ -263,15 +263,23 @@ GDW_VPDCOMMDLL_API int WINAPI GDW_GetVehicleInfo(char* pchPlate, char* pchTime, 
     strcpy_s(pchTime, strlen(pTempResult->chPlateTime) + 1, pTempResult->chPlateTime);
     g_WriteLog(pTempResult->chPlateTime);
 
-#ifdef  TEST
+#ifdef TEST    
 
     if (pTempResult->CIMG_BinImage.dwImgSize > 0)
     {
+        memset(chLog, 0, sizeof(chLog));
+        sprintf_s(chLog, sizeof(chLog), "GDW_GetVehicleInfo:: begin get the binary Image, size = %lu", pTempResult->CIMG_BinImage.dwImgSize);
+        g_WriteLog(chLog);
+
         memcpy(pByteBinImage, pTempResult->CIMG_BinImage.pbImgData, pTempResult->CIMG_BinImage.dwImgSize);
         g_WriteLog("GDW_GetVehicleInfo:: get the binary Image.");
     }
-    if (pTempResult->CIMG_PlateImage.dwImgSize > 0 && pTempResult->CIMG_PlateImage.dwImgSize <= PLATE_IMG_SIZE)
+    if (pTempResult->CIMG_PlateImage.dwImgSize > 0 /*&& pTempResult->CIMG_PlateImage.dwImgSize <= COMPRESS_PLATE_IMG_SIZE*/)
     {
+        memset(chLog, 0, sizeof(chLog));
+        sprintf_s(chLog, sizeof(chLog), "GDW_GetVehicleInfo:: begin get the plate Image, size = %lu", pTempResult->CIMG_PlateImage.dwImgSize);
+        g_WriteLog(chLog);
+
         memcpy(pBytePlateJpeg, pTempResult->CIMG_PlateImage.pbImgData, pTempResult->CIMG_PlateImage.dwImgSize);
         dwPlateJpegSize = pTempResult->CIMG_PlateImage.dwImgSize;
         g_WriteLog("GDW_GetVehicleInfo:: get the plate Image.");
@@ -280,8 +288,12 @@ GDW_VPDCOMMDLL_API int WINAPI GDW_GetVehicleInfo(char* pchPlate, char* pchTime, 
     {
         g_WriteLog("GDW_GetVehicleInfo:: plate Image 没有车牌图片或车牌图大于 5K.");
     }
-    if (pTempResult->CIMG_BestSnapshot.dwImgSize > 0 && pTempResult->CIMG_BestSnapshot.dwImgSize <= BIG_IMG_SIZE)
+    if (pTempResult->CIMG_BestSnapshot.dwImgSize > 0 /*&& pTempResult->CIMG_BestSnapshot.dwImgSize <= COMPRESS_BIG_IMG_SIZE*/)
     {
+        memset(chLog, 0, sizeof(chLog));
+        sprintf_s(chLog, sizeof(chLog), "GDW_GetVehicleInfo:: begin get the FarJpeg Image, size = %lu", pTempResult->CIMG_BestSnapshot.dwImgSize);
+        g_WriteLog(chLog);
+
         memcpy(pByteFarJpeg, pTempResult->CIMG_BestSnapshot.pbImgData, pTempResult->CIMG_BestSnapshot.dwImgSize);
         dwFarJpegSize = pTempResult->CIMG_BestSnapshot.dwImgSize;
         g_WriteLog("GDW_GetVehicleInfo:: get the BestSnapshot Image.");
@@ -289,10 +301,14 @@ GDW_VPDCOMMDLL_API int WINAPI GDW_GetVehicleInfo(char* pchPlate, char* pchTime, 
     else
     {
         bOnlyPlate = true;
-        g_WriteLog("GDW_GetVehicleInfo:: FarJpeg Image 没有车牌图片或车牌图大于 100K.");
+        g_WriteLog("GDW_GetVehicleInfo:: FarJpeg Image 没有车牌图片.");
     }
-    if (pTempResult->CIMG_LastSnapshot.dwImgSize > 0 && pTempResult->CIMG_LastSnapshot.dwImgSize <= BIG_IMG_SIZE)
+    if (pTempResult->CIMG_LastSnapshot.dwImgSize > 0 /*&& pTempResult->CIMG_LastSnapshot.dwImgSize <= COMPRESS_BIG_IMG_SIZE*/)
     {
+        memset(chLog, 0, sizeof(chLog));
+        sprintf_s(chLog, sizeof(chLog), "GDW_GetVehicleInfo:: begin get the CarJpeg Image, size = %lu", pTempResult->CIMG_LastSnapshot.dwImgSize);
+        g_WriteLog(chLog);
+
         memcpy(pByteCarJpeg, pTempResult->CIMG_LastSnapshot.pbImgData, pTempResult->CIMG_LastSnapshot.dwImgSize);
         dwCarJpegSize = pTempResult->CIMG_LastSnapshot.dwImgSize;
         g_WriteLog("GDW_GetVehicleInfo:: get the LastSnapshot Image.");
@@ -300,10 +316,9 @@ GDW_VPDCOMMDLL_API int WINAPI GDW_GetVehicleInfo(char* pchPlate, char* pchTime, 
     else
     {
         bOnlyPlate = true;
-        g_WriteLog("GDW_GetVehicleInfo:: CarJpeg Image 没有车牌图片或车牌图大于 100K.");
+        g_WriteLog("GDW_GetVehicleInfo:: CarJpeg Image 没有车牌图片.");
     }
-
-#endif //  TEST
+#endif // TEST
 
     if (pTempResult != NULL)
     {
@@ -350,13 +365,13 @@ GDW_VPDCOMMDLL_API int WINAPI GDW_GetVehicleInfo2AD(char* pchPlate, char* pchTim
         memcpy(pByteBinImage, pTempResult->CIMG_BinImage.pbImgData, pTempResult->CIMG_BinImage.dwImgSize);
         g_WriteLog("GDW_GetVehicleInfo2AD:: get the binary Image.");
     }
-    if (pTempResult->CIMG_PlateImage.dwImgSize > 0 && pTempResult->CIMG_PlateImage.dwImgSize <= PLATE_IMG_SIZE)
+    if (pTempResult->CIMG_PlateImage.dwImgSize > 0 && pTempResult->CIMG_PlateImage.dwImgSize <= COMPRESS_PLATE_IMG_SIZE)
     {
         memcpy(pBytePlateJpeg, pTempResult->CIMG_PlateImage.pbImgData, pTempResult->CIMG_PlateImage.dwImgSize);
         dwPlateJpegSize = pTempResult->CIMG_PlateImage.dwImgSize;
         g_WriteLog("GDW_GetVehicleInfo2AD:: get the plate Image.");
     }
-    if (pTempResult->CIMG_LastSnapshot.dwImgSize > 0 && pTempResult->CIMG_LastSnapshot.dwImgSize <= BIG_IMG_SIZE)
+    if (pTempResult->CIMG_LastSnapshot.dwImgSize > 0 && pTempResult->CIMG_LastSnapshot.dwImgSize <= COMPRESS_BIG_IMG_SIZE)
     {
         memcpy(pByteCarJpeg, pTempResult->CIMG_LastSnapshot.pbImgData, pTempResult->CIMG_LastSnapshot.dwImgSize);
         dwCarJpegSize = pTempResult->CIMG_LastSnapshot.dwImgSize;

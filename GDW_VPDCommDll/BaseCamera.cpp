@@ -542,7 +542,7 @@ bool BaseCamera::WriteLog(const char* chlog)
     //sprintf_s(chLogPath, "D:\\XLWLog\\%04d-%02d-%02d\\%s\\", pTM.tm_year + 1900, pTM.tm_mon + 1, pTM.tm_mday, m_strIP.c_str());
     char chLogRoot[128] = { 0 };
     Tool_ReadKeyValueFromConfigFile(INI_FILE_NAME,"Log", "Path", chLogRoot, sizeof(chLogRoot));
-    sprintf_s(chLogPath, "%s\\%04d-%02d-%02d\\%s\\", chLogRoot,  pTM.tm_year + 1900, pTM.tm_mon + 1, pTM.tm_mday, m_strIP.c_str());
+    sprintf_s(chLogPath, sizeof(chLogPath), "%s\\%04d-%02d-%02d\\%s\\", chLogRoot,  pTM.tm_year + 1900, pTM.tm_mon + 1, pTM.tm_mday, m_strIP.c_str());
 #endif
 
     MakeSureDirectoryPathExists(chLogPath);
@@ -875,19 +875,49 @@ void BaseCamera::SaveResultToBufferPath(CameraResult* pResult)
     ////LAST_SNAPSHOT
     //sprintf_s(pResult->CIMG_LastSnapshot.chSavePath, "%s\\Buffer\\%s\\%d-%s-%s-%s-车型%d-车轴%d-%d-LastSnapshot.jpg", szFileName, m_strIP.c_str(), dwPlateTime, pResult->chPlateNO, chPlateColor, pResult->chPlateTime, pResult->iVehTypeNo, pResult->iAxletreeCount, pResult->dwCarID);
 
-    sprintf_s(pResult->CIMG_BinImage.chSavePath, "%s\\Buffer\\%s\\%s-%s-bin.bin", chLogPath, m_strIP.c_str(), pResult->chPlateTime, pResult->chPlateNO);
+    int iYear = 0, iMonth = 0, iDay = 0, iHour;
+    if (strlen(pResult->chPlateTime) >0)
+    {
+        std::string strTime(pResult->chPlateTime);
+        std::string strYear = strTime.substr(0, 4);
+        iYear = atoi(strYear.c_str());
+
+        std::string strMonth = strTime.substr(4, 2);
+        iMonth = atoi(strMonth.c_str());
+
+        std::string strDay = strTime.substr(6, 2);
+        iDay = atoi(strDay.c_str());
+    }
+    else
+    {
+        time_t timeT = time(NULL);//这句返回的只是一个时间cuo
+        tm timeNow;
+        localtime_s(&timeNow, &timeT );
+        iYear = timeNow.tm_year + 1900;
+        iMonth = timeNow.tm_mon + 1;
+        iDay = timeNow.tm_mday;
+    }
+
+    sprintf_s(pResult->CIMG_BinImage.chSavePath, sizeof(pResult->CIMG_BinImage.chSavePath), "%s\\%4d-%02d-%02d\\Result\\%s\\%s-%s-bin.bin", \
+        chLogPath, iYear, iMonth, iDay,m_strIP.c_str(), pResult->chPlateTime, pResult->chPlateNO);
     //车牌图
-    sprintf_s(pResult->CIMG_PlateImage.chSavePath, "%s\\Buffer\\%s\\%s-%s-Plate.jpg", chLogPath, m_strIP.c_str(), pResult->chPlateTime, pResult->chPlateNO);
+    sprintf_s(pResult->CIMG_PlateImage.chSavePath, sizeof(pResult->CIMG_BinImage.chSavePath), "%s\\%4d-%02d-%02d\\Result\\%s\\%s-%s-Plate.jpg", \
+        chLogPath, iYear, iMonth, iDay, m_strIP.c_str(), pResult->chPlateTime, pResult->chPlateNO);
     //bestCapture
-    sprintf_s(pResult->CIMG_BestCapture.chSavePath, "%s\\Buffer\\%s\\%s-%s-BestCapture.jpg", chLogPath, m_strIP.c_str(), pResult->chPlateTime, pResult->chPlateNO);
+    sprintf_s(pResult->CIMG_BestCapture.chSavePath, sizeof(pResult->CIMG_BinImage.chSavePath), "%s\\%4d-%02d-%02d\\Result\\%s\\%s-%s-BestCapture.jpg", \
+        chLogPath, iYear, iMonth, iDay, m_strIP.c_str(), pResult->chPlateTime, pResult->chPlateNO);
     //lastCapture
-    sprintf_s(pResult->CIMG_LastCapture.chSavePath, "%s\\Buffer\\%s\\%s-%s-LastCapture.jpg", chLogPath, m_strIP.c_str(), pResult->chPlateTime, pResult->chPlateNO);
+    sprintf_s(pResult->CIMG_LastCapture.chSavePath, sizeof(pResult->CIMG_BinImage.chSavePath), "%s\\%4d-%02d-%02d\\Result\\%s\\%s-%s-LastCapture.jpg", \
+        chLogPath, iYear, iMonth, iDay, m_strIP.c_str(), pResult->chPlateTime, pResult->chPlateNO);
     //BEGIN_CAPTURE
-    sprintf_s(pResult->CIMG_BeginCapture.chSavePath, "%s\\Buffer\\%s\\%s-%s-BeginCapture.jpg", chLogPath, m_strIP.c_str(), pResult->chPlateTime, pResult->chPlateNO);
+    sprintf_s(pResult->CIMG_BeginCapture.chSavePath, sizeof(pResult->CIMG_BinImage.chSavePath), "%s\\%4d-%02d-%02d\\Result\\%s\\%s-%s-BeginCapture.jpg", \
+        chLogPath, iYear, iMonth, iDay, m_strIP.c_str(), pResult->chPlateTime, pResult->chPlateNO);
     //BEST_SNAPSHOT
-    sprintf_s(pResult->CIMG_BestSnapshot.chSavePath, "%s\\Buffer\\%s\\%s-%s-BestSnapshot.jpg", chLogPath, m_strIP.c_str(), pResult->chPlateTime, pResult->chPlateNO);
+    sprintf_s(pResult->CIMG_BestSnapshot.chSavePath, sizeof(pResult->CIMG_BinImage.chSavePath), "%s\\%4d-%02d-%02d\\Result\\%s\\%s-%s-BestSnapshot.jpg", \
+        chLogPath, iYear, iMonth, iDay, m_strIP.c_str(), pResult->chPlateTime, pResult->chPlateNO);
     //LAST_SNAPSHOT
-    sprintf_s(pResult->CIMG_LastSnapshot.chSavePath, "%s\\Buffer\\%s\\%s-%s-LastSnapshot.jpg", chLogPath, m_strIP.c_str(), pResult->chPlateTime, pResult->chPlateNO);
+    sprintf_s(pResult->CIMG_LastSnapshot.chSavePath, sizeof(pResult->CIMG_BinImage.chSavePath), "%s\\%4d-%02d-%02d\\Result\\%s\\%s-%s-LastSnapshot.jpg", \
+        chLogPath, iYear, iMonth, iDay, m_strIP.c_str(), pResult->chPlateTime, pResult->chPlateNO);
 
 
     if (pResult->CIMG_BinImage.pbImgData)

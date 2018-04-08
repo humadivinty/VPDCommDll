@@ -94,7 +94,7 @@ void Tool_ReadKeyValueFromConfigFile(const char* IniFileName, const char* nodeNa
 	PathRemoveFileSpecA(FileName);
     char iniFileName[MAX_PATH] = { 0 };
 	//char iniDeviceInfoName[MAX_PATH] = { 0 };
-	MY_SPRINTF(iniFileName, "%s\\%s", FileName, IniFileName);
+	MY_SPRINTF(iniFileName, sizeof(iniFileName), "%s\\%s", FileName, IniFileName);
 
 	GetPrivateProfileStringA(nodeName, keyName, "0", keyValue, bufferSize, iniFileName);
 
@@ -679,7 +679,7 @@ bool DeleteDirectory(char* strDirName)
 
     char strTempFileFind[MAX_PATH];
 
-    MY_SPRINTF(strTempFileFind, "%s//*.*", strDirName);
+    MY_SPRINTF(strTempFileFind, sizeof(strTempFileFind), "%s//*.*", strDirName);
 
     BOOL IsFinded = tempFind.FindFile(strTempFileFind);
 
@@ -698,7 +698,7 @@ bool DeleteDirectory(char* strDirName)
             {
                 char strTempDir[MAX_PATH];
 
-                MY_SPRINTF(strTempDir, "%s//%s", strDirName, strFoundFileName);
+                MY_SPRINTF(strTempDir, sizeof(strTempDir), "%s//%s", strDirName, strFoundFileName);
 
                 DeleteDirectory(strTempDir);
             }
@@ -706,7 +706,7 @@ bool DeleteDirectory(char* strDirName)
             {
                 char strTempFileName[MAX_PATH];
 
-                MY_SPRINTF(strTempFileName, "%s//%s", strDirName, strFoundFileName);
+                MY_SPRINTF(strTempFileName, sizeof(strTempFileName), "%s//%s", strDirName, strFoundFileName);
 
                 DeleteFile(strTempFileName);
             }
@@ -728,7 +728,7 @@ int CirclelaryDelete(char* folderPath, int iBackUpDays)
     printf("进入环覆盖线程主函数,开始查找制定目录下的文件夹");
     char myPath[MAX_PATH] = { 0 };
     //sprintf(myPath, "%s\\*", folderPath);
-    MY_SPRINTF(myPath, "%s\\*", folderPath);
+    MY_SPRINTF(myPath,sizeof(myPath),  "%s\\*", folderPath);
 
     CTime tmCurrentTime = CTime::GetCurrentTime();
     CTime tmLastMonthTime = tmCurrentTime - CTimeSpan(iBackUpDays, 0, 0, 0);
@@ -745,7 +745,7 @@ int CirclelaryDelete(char* folderPath, int iBackUpDays)
         bFinded = myFileFind.FindNextFileA();
         if (!myFileFind.IsDots())
         {
-            MY_SPRINTF(DirectoryName, "%s", myFileFind.GetFileName().GetBuffer());
+            MY_SPRINTF(DirectoryName, sizeof(DirectoryName), "%s", myFileFind.GetFileName().GetBuffer());
             if (myFileFind.IsDirectory())
             {
                 int iYear, iMonth, iDay;
@@ -758,36 +758,36 @@ int CirclelaryDelete(char* folderPath, int iBackUpDays)
                 }
                 if (iYear < Last_Year)
                 {
-                    MY_SPRINTF(DirectoryName, "%s\\%s", folderPath, myFileFind.GetFileName().GetBuffer());
+                    MY_SPRINTF(DirectoryName,sizeof(DirectoryName), "%s\\%s", folderPath, myFileFind.GetFileName().GetBuffer());
                     printf("delete the DirectoryB :%s\n", DirectoryName);
                     DeleteDirectory(DirectoryName);
 
                     char chLog[MAX_PATH] = { 0 };
-                    MY_SPRINTF(chLog, "年份小于当前年份，删除文件夹%s", DirectoryName);
+                    MY_SPRINTF(chLog,sizeof(chLog), "年份小于当前年份，删除文件夹%s", DirectoryName);
                     printf(chLog);
                 }
                 else if (iYear == Last_Year)
                 {
                     if (iMonth < Last_Month)
                     {
-                        MY_SPRINTF(DirectoryName, "%s\\%s", folderPath, myFileFind.GetFileName().GetBuffer());
+                        MY_SPRINTF(DirectoryName, sizeof(DirectoryName), "%s\\%s", folderPath, myFileFind.GetFileName().GetBuffer());
                         printf("delete the DirectoryB :%s\n", DirectoryName);
                         DeleteDirectory(DirectoryName);
 
                         char chLog[MAX_PATH] = { 0 };
-                        MY_SPRINTF(chLog, "月份小于上一月，删除文件夹%s", DirectoryName);
+                        MY_SPRINTF(chLog,sizeof(chLog), "月份小于上一月，删除文件夹%s", DirectoryName);
                         printf(chLog);
                     }
                     else if (iMonth == Last_Month)
                     {
                         if (iDay < Last_Day)
                         {
-                            MY_SPRINTF(DirectoryName, "%s\\%s", folderPath, myFileFind.GetFileName().GetBuffer());
+                            MY_SPRINTF(DirectoryName, sizeof(DirectoryName), "%s\\%s", folderPath, myFileFind.GetFileName().GetBuffer());
                             printf("delete the DirectoryB :%s\n", DirectoryName);
                             DeleteDirectory(DirectoryName);
 
                             char chLog[MAX_PATH] = { 0 };
-                            MY_SPRINTF(chLog, "日号小于指定天数，删除文件夹%s", DirectoryName);
+                            MY_SPRINTF(chLog, sizeof(chLog), "日号小于指定天数，删除文件夹%s", DirectoryName);
                             printf(chLog);
                         }
                     }
